@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderType {
+  MESA
+  DOMICILIO
+}
+
+enum OrderStatus {
+  PENDIENTE
+  EN_PREPARACION
+  ENTREGADO
+  CANCELADO
+}
+
+// Ya existente por el login de la Unidad 1 (si ya lo tienes, conserva el tuyo
+// y solo agrega la relación orders Order[]).
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String
+  name     String
+  orders   Order[]
+
+  @@map("users")
+}
+
+// Entidad transaccional (caso 6: Pedido)
+model Order {
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  user        User        @relation(fields: [userId], references: [id])
+  // _id del plato en MongoDB (referencia entre bases, SIN foreign key)
+  dishId      String?
+  type        OrderType
+  tableNumber Int?
+  address     String?
+  quantity    Int
+  // Copia del precio del plato al momento del pedido (el menú cambia cada semana)
+  unitPrice   Decimal     @db.Decimal(10, 2)
+  total       Decimal     @db.Decimal(10, 2)
+  status      OrderStatus @default(PENDIENTE)
+  createdAt   DateTime    @default(now())
+
+  @@index([dishId])
+  @@index([userId])
+  @@map("orders")
+}

@@ -1,0 +1,1537 @@
+{
+  "info": {
+    "name": "TareaU2_Guayta - Restaurante híbrido",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Autenticación (PostgreSQL)",
+      "item": [
+        {
+          "name": "Registrar cliente 1",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.collectionVariables.set(\"email1\", `cliente1_${ts}@test.com`);",
+                  "pm.collectionVariables.set(\"email2\", `cliente2_${ts}@test.com`);",
+                  "pm.collectionVariables.set(\"password\", \"secreto123\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 al registrar\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"devuelve id y no devuelve la contraseña\", function () {",
+                  "  const j = pm.response.json(); pm.expect(j.id).to.be.a('number'); pm.expect(j).to.not.have.property('password');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email1}}\",\n  \"password\": \"{{password}}\",\n  \"name\": \"Cliente Uno\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registrar cliente 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 al registrar el segundo usuario\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email2}}\",\n  \"password\": \"{{password}}\",\n  \"name\": \"Cliente Dos\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registrar con email repetido → 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"409 por email duplicado\", function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email1}}\",\n  \"password\": \"{{password}}\",\n  \"name\": \"Cliente Uno\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login cliente 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 y token JWT\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(200); pm.expect(j.token).to.be.a('string'); pm.collectionVariables.set('token1', j.token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email1}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login cliente 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 y token del segundo usuario\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(200); pm.collectionVariables.set('token2', j.token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email2}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login con clave incorrecta → 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"401 con credenciales malas\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email1}}\",\n  \"password\": \"incorrecta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Catálogo de platos (MongoDB)",
+      "item": [
+        {
+          "name": "Crear plato sin token → 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"401 sin JWT\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dishes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"  Ceviche   Mixto \",\n  \"description\": \"Pescado y camarón marinados en limón\",\n  \"category\": \"plato fuerte\",\n  \"price\": 12.5,\n  \"ingredients\": [\n    \"Pescado\",\n    \"Camarón\",\n    \"Limón\",\n    \"Cebolla\"\n  ],\n  \"allergens\": [\n    \"pescado\",\n    \"mariscos\"\n  ],\n  \"prepMinutes\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Crear plato inválido → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 con validaciones\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(400); pm.expect(j.errors).to.be.an('array').that.is.not.empty;",
+                  "});",
+                  "pm.test(\"mensajes en español\", function () {",
+                  "  const j = pm.response.json(); pm.expect(j.errors.some(e => e.includes('nombre'))).to.be.true; pm.expect(j.errors.some(e => e.includes('ingrediente'))).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dishes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"A\",\n  \"category\": \"sopa\",\n  \"price\": -5,\n  \"ingredients\": [],\n  \"allergens\": [\n    \"plutonio\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Crear plato válido → 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 al crear\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(201); pm.collectionVariables.set('dishId', j._id);",
+                  "});",
+                  "pm.test(\"pre('validate') normaliza nombre e ingredientes\", function () {",
+                  "  const j = pm.response.json(); pm.expect(j.name).to.eql('Ceviche Mixto'); pm.expect(j.ingredients[0]).to.eql('pescado');",
+                  "});",
+                  "pm.test(\"el virtual priceLabel se calcula\", function () {",
+                  "  const j = pm.response.json(); pm.expect(j.priceLabel).to.eql('$12.50');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dishes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"  Ceviche   Mixto \",\n  \"description\": \"Pescado y camarón marinados en limón\",\n  \"category\": \"plato fuerte\",\n  \"price\": 12.5,\n  \"ingredients\": [\n    \"Pescado\",\n    \"Camarón\",\n    \"Limón\",\n    \"Cebolla\"\n  ],\n  \"allergens\": [\n    \"pescado\",\n    \"mariscos\"\n  ],\n  \"prepMinutes\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar con ?q= y ?fields= y orden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 y encuentra el plato por regex\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(200); pm.expect(j.data.some(d => d._id === pm.collectionVariables.get('dishId'))).to.be.true;",
+                  "});",
+                  "pm.test(\"la proyección omite campos no pedidos\", function () {",
+                  "  const j = pm.response.json(); const d = j.data[0]; pm.expect(d).to.have.property('name'); pm.expect(d).to.not.have.property('ingredients');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dishes?q=cevi&fields=name,price&sort=-price",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "cevi"
+                },
+                {
+                  "key": "fields",
+                  "value": "name,price"
+                },
+                {
+                  "key": "sort",
+                  "value": "-price"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener plato por id → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 con el plato\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(200); pm.expect(j.category).to.eql('plato fuerte');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dishes/{{dishId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes",
+                "{{dishId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener plato con id mal formado → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 por ObjectId inválido\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dishes/abc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener plato inexistente → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"404 no encontrado\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dishes/000000000000000000000000",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes",
+                "000000000000000000000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar plato con precio inválido → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 y no se guarda\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dishes/{{dishId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes",
+                "{{dishId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Actualizar plato (findById + save) → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 con precio nuevo\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(200); pm.expect(j.priceLabel).to.eql('$15.00');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dishes/{{dishId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes",
+                "{{dishId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 15,\n  \"description\": \"Ceviche de la semana\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Pedidos (PostgreSQL valida MongoDB)",
+      "item": [
+        {
+          "name": "Pedido con plato inexistente → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"404 porque el _id no existe en MongoDB\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dishId\": \"000000000000000000000000\",\n  \"quantity\": 1,\n  \"type\": \"MESA\",\n  \"tableNumber\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Pedido con dishId mal formado → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 por ObjectId inválido\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dishId\": \"xyz\",\n  \"quantity\": 1,\n  \"type\": \"MESA\",\n  \"tableNumber\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Pedido a MESA sin número → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 falta tableNumber\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dishId\": \"{{dishId}}\",\n  \"quantity\": 1,\n  \"type\": \"MESA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Crear pedido → 201 con total exacto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 y guarda el _id de Mongo como dishId\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(201); pm.expect(j.dishId).to.eql(pm.collectionVariables.get('dishId')); pm.collectionVariables.set('orderId', j.id);",
+                  "});",
+                  "pm.test(\"total exacto = precio × cantidad\", function () {",
+                  "  const j = pm.response.json(); pm.expect(j.total).to.eql(30); pm.expect(j.unitPrice).to.eql(15);",
+                  "});",
+                  "pm.test(\"userId viene del JWT\", function () {",
+                  "  const j = pm.response.json(); pm.expect(j.userId).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dishId\": \"{{dishId}}\",\n  \"quantity\": 2,\n  \"type\": \"MESA\",\n  \"tableNumber\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mis pedidos (consulta unida $in) → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"trae el pedido con el nombre del plato (datos de las dos bases)\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(200); pm.expect(j.data).to.have.lengthOf(1); pm.expect(j.data[0].dish.name).to.eql('Ceviche Mixto'); pm.expect(j.data[0].total).to.eql(30);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/mine",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "mine"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Calificaciones (MongoDB valida PostgreSQL)",
+      "item": [
+        {
+          "name": "Calificar pedido no entregado → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 porque aún no está ENTREGADO\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"rating\": 5,\n  \"comment\": \"Muy rico\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Marcar pedido como ENTREGADO",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 y estado actualizado\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(200); pm.expect(j.status).to.eql('ENTREGADO');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/{{orderId}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ENTREGADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Calificar pedido ajeno → 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"403 el pedido es de otro usuario\", function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token2}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"rating\": 1,\n  \"comment\": \"No es mío\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Calificar pedido inexistente → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"404 el pedido no existe en PostgreSQL\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 999999999,\n  \"rating\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Calificación inválida → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 rating fuera de rango\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(400); pm.expect(j.errors[0]).to.include('máxima');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"rating\": 9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Crear calificación → 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 al crear\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"customerName se copió de PostgreSQL y userId vino del JWT\", function () {",
+                  "  const j = pm.response.json(); pm.expect(j.customerName).to.eql('Cliente Uno'); pm.expect(j.userId).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"rating\": 5,\n  \"comment\": \"Excelente ceviche\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Calificar dos veces el mismo pedido → 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"409 por el índice único (E11000)\", function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"rating\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar calificaciones (populate + orden + aggregate)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 y resumen del aggregate\", function () {",
+                  "  const j = pm.response.json(); pm.response.to.have.status(200); pm.expect(j.summary.total).to.eql(1); pm.expect(j.summary.average).to.eql(5);",
+                  "});",
+                  "pm.test(\"populate trae el nombre del plato\", function () {",
+                  "  const j = pm.response.json(); pm.expect(j.data[0].dish.name).to.eql('Ceviche Mixto');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews?dishId={{dishId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "dishId",
+                  "value": "{{dishId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Borrado protegido y limpieza",
+      "item": [
+        {
+          "name": "Borrar plato en uso → 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"409 porque PostgreSQL lo usa\", function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dishes/{{dishId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes",
+                "{{dishId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Borrar pedido (cascada a su calificación)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 pedido eliminado\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/{{orderId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{orderId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "La calificación ya no existe (cascada)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"summary.total = 0 tras el borrado\", function () {",
+                  "  const j = pm.response.json(); pm.expect(j.summary.total).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews?dishId={{dishId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "dishId",
+                  "value": "{{dishId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Borrar plato libre → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 plato eliminado\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dishes/{{dishId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes",
+                "{{dishId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "El plato ya no existe → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"404 tras borrarlo\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dishes/{{dishId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dishes",
+                "{{dishId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Borrar cliente 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 usuario 1 eliminado\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Borrar cliente 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 usuario 2 eliminado\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api"
+    }
+  ]
+}

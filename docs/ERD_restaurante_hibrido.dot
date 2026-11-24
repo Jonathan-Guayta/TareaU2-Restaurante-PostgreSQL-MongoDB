@@ -1,0 +1,56 @@
+digraph ERD {
+  rankdir=LR; compound=true; fontname="Helvetica"; nodesep=0.6; ranksep=2.0;
+  node [shape=plain fontname="Helvetica" fontsize=11];
+  edge [fontname="Helvetica" fontsize=10 arrowhead=none];
+
+  subgraph cluster_pg {
+    label=<<B>ZONA POSTGRESQL (Prisma)</B>>; style="rounded,filled"; fillcolor="#E8F0FA"; color="#336791"; fontsize=15;
+    USER [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white">
+      <TR><TD BGCOLOR="#336791"><FONT COLOR="white"><B>User</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT">id : Int  (PK)</TD></TR>
+      <TR><TD ALIGN="LEFT">email : String  (único)</TD></TR>
+      <TR><TD ALIGN="LEFT">password : String</TD></TR>
+      <TR><TD ALIGN="LEFT">name : String</TD></TR></TABLE>>];
+    ORDER [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white">
+      <TR><TD BGCOLOR="#336791"><FONT COLOR="white"><B>Order (pedido)</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT">id : Int  (PK)</TD></TR>
+      <TR><TD ALIGN="LEFT">userId : Int  (FK → User)</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>dishId : String?</B>  (→ Mongo, sin FK)</TD></TR>
+      <TR><TD ALIGN="LEFT">type : MESA | DOMICILIO</TD></TR>
+      <TR><TD ALIGN="LEFT">tableNumber : Int?  address : String?</TD></TR>
+      <TR><TD ALIGN="LEFT">quantity : Int</TD></TR>
+      <TR><TD ALIGN="LEFT"><I>unitPrice : Decimal  (COPIA del precio)</I></TD></TR>
+      <TR><TD ALIGN="LEFT">total : Decimal(10,2)</TD></TR>
+      <TR><TD ALIGN="LEFT">status : OrderStatus</TD></TR>
+      <TR><TD ALIGN="LEFT">@@index([dishId])  @@index([userId])</TD></TR></TABLE>>];
+    USER -> ORDER [label="1 ──< N  (FK userId)" arrowhead=crow arrowtail=tee dir=both color="#336791" penwidth=2];
+  }
+
+  subgraph cluster_mongo {
+    label=<<B>ZONA MONGODB (Mongoose)</B>>; style="rounded,filled"; fillcolor="#E9F5E9"; color="#3F8F3F"; fontsize=15;
+    DISH [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white">
+      <TR><TD BGCOLOR="#3F8F3F"><FONT COLOR="white"><B>Dish (plato)</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT">_id : ObjectId  (PK)</TD></TR>
+      <TR><TD ALIGN="LEFT">name, description, category : String</TD></TR>
+      <TR><TD ALIGN="LEFT">price : Number</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>ingredients : [String]</B>  (embebido)</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>allergens : [String]</B>  (embebido)</TD></TR>
+      <TR><TD ALIGN="LEFT">prepMinutes : Number  available : Boolean</TD></TR>
+      <TR><TD ALIGN="LEFT"><I>virtual priceLabel</I></TD></TR></TABLE>>];
+    REVIEW [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white">
+      <TR><TD BGCOLOR="#3F8F3F"><FONT COLOR="white"><B>Review (calificación)</B></FONT></TD></TR>
+      <TR><TD ALIGN="LEFT">_id : ObjectId  (PK)</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>orderId : Number</B>  (único, → PG, sin FK)</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>userId : Number</B>  (→ PG, sin FK)</TD></TR>
+      <TR><TD ALIGN="LEFT"><I>customerName : String  (COPIA de User.name)</I></TD></TR>
+      <TR><TD ALIGN="LEFT">dish : ObjectId  (ref Dish)</TD></TR>
+      <TR><TD ALIGN="LEFT">rating : 1–5   comment : String</TD></TR>
+      <TR><TD ALIGN="LEFT">índices: {orderId} único · {dish, createdAt:-1}</TD></TR></TABLE>>];
+    DISH -> REVIEW [label="1 ──< N  (ObjectId + ref)" arrowhead=crow arrowtail=tee dir=both color="#3F8F3F" penwidth=2];
+  }
+
+  // Referencias ENTRE BASES: punteadas, sin FK
+  DISH -> ORDER [label="Order.dishId = Dish._id\n(String, sin FK)" style=dashed color="#B03030" penwidth=2 arrowhead=crow arrowtail=tee dir=both constraint=false];
+  ORDER -> REVIEW [label="Review.orderId = Order.id\n(Number único, sin FK)" style=dashed color="#B03030" penwidth=2 arrowhead=teeodot arrowtail=tee dir=both constraint=false];
+  USER -> REVIEW [label="Review.userId = User.id\n(Number, sin FK)" style=dashed color="#B03030" penwidth=2 constraint=false];
+}
